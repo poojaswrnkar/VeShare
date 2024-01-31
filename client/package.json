@@ -23,6 +23,11 @@
       "react-app",
       "react-app/jest"
     ]
+     "jest": {
+    "globals": {
+      "MyGlobalVariable": true
+    }
+  }
   },
   "browserslist": {
     "production": [
