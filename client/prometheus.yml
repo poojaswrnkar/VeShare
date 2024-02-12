@@ -1,0 +1,28 @@
+#
+#3
+
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets:
+          # - alertmanager:9093
+
+
+rule_files:
+
+scrape_configs:
+  # Scrape Prometheus itself
+  - job_name: "prometheus"
+    static_configs:
+      - targets: ["localhost:9090"]
+
+  # Scrape Docker Swarm metrics
+  - job_name: 'docker-swarm'
+    metrics_path: '/metrics'
+    scheme: 'http'
+    static_configs:
+      - targets: ['54.227.62.129:9323']
