@@ -1,66 +1,95 @@
-# # name: CI/CD with SonarQube
+# # # name: CI/CD with SonarQube
 
-# # on:
-# #   pull_request:
-# #     branches:
-# #       - main
-# #       - develop
+# # # on:
+# # #   pull_request:
+# # #     branches:
+# # #       - main
+# # #       - develop
 
-# # jobs:
-# #   build:
-# #     name: Build and SonarQube Analysis
-# #     runs-on: ubuntu-latest
+# # # jobs:
+# # #   build:
+# # #     name: Build and SonarQube Analysis
+# # #     runs-on: ubuntu-latest
 
-# #     steps:
-# #     - name: Checkout code
-# #       uses: actions/checkout@v2
-# #       with:
-# #         fetch-depth: 0
+# # #     steps:
+# # #     - name: Checkout code
+# # #       uses: actions/checkout@v2
+# # #       with:
+# # #         fetch-depth: 0
 
-# #     - name: Set up Java
-# #       uses: actions/setup-java@v2
-# #       with:
-# #         java-version: '11'  # or a version compatible with SonarScanner
+# # #     - name: Set up Java
+# # #       uses: actions/setup-java@v2
+# # #       with:
+# # #         java-version: '11'  # or a version compatible with SonarScanner
 
-# #     - name: Set up Node.js
-# #       uses: actions/setup-node@v2
-# #       with:
-# #         node-version: '16'
+# # #     - name: Set up Node.js
+# # #       uses: actions/setup-node@v2
+# # #       with:
+# # #         node-version: '16'
 
-# #     - name: Cache node modules
-# #       uses: actions/cache@v2
-# #       with:
-# #         path: ~/.npm
-# #         key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
-# #         restore-keys: |
-# #           ${{ runner.os }}-node-
+# # #     - name: Cache node modules
+# # #       uses: actions/cache@v2
+# # #       with:
+# # #         path: ~/.npm
+# # #         key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+# # #         restore-keys: |
+# # #           ${{ runner.os }}-node-
 
-# #     - name: Install dependencies
-# #       run: npm install
+# # #     - name: Install dependencies
+# # #       run: npm install
 
-# #     - name: Install SonarQube Scanner
-# #       run: npm install -g sonarqube-scanner
+# # #     - name: Install SonarQube Scanner
+# # #       run: npm install -g sonarqube-scanner
 
-# #     - name: SonarQube Scan
-# #       env:
-# #         SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-# #         SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
-# #       run: |
-# #         sonar-scanner -X \
-# #           -Dsonar.projectKey=Static-code-analysis \
-# #           -Dsonar.organization=Static-code-analysis \
-# #           -Dsonar.host.url=${{ secrets.SONAR_HOST_URL }} \
-# #           -Dsonar.login=${{ secrets.SONAR_TOKEN }}
+# # #     - name: SonarQube Scan
+# # #       env:
+# # #         SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+# # #         SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
+# # #       run: |
+# # #         sonar-scanner -X \
+# # #           -Dsonar.projectKey=Static-code-analysis \
+# # #           -Dsonar.organization=Static-code-analysis \
+# # #           -Dsonar.host.url=${{ secrets.SONAR_HOST_URL }} \
+# # #           -Dsonar.login=${{ secrets.SONAR_TOKEN }}
 
 
 
-# # name: Build
+# # # name: Build
+
+# # # on:
+# # #   push:
+# # #     branches:
+# # #       - main
+
+
+# # # jobs:
+# # #   build:
+# # #     name: Build and analyze
+# # #     runs-on: ubuntu-latest
+    
+# # #     steps:
+# # #       - uses: actions/checkout@v4
+# # #         with:
+# # #           fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
+# # #       - uses: sonarsource/sonarqube-scan-action@master
+# # #         env:
+# # #           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+# # #           SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
+# # #       # If you wish to fail your job when the Quality Gate is red, uncomment the
+# # #       # following lines. This would typically be used to fail a deployment.
+# # #       # - uses: sonarsource/sonarqube-quality-gate-action@master
+# # #       #   timeout-minutes: 5
+# # #       #   env:
+# # #       #     SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+
+
+
+# # name: Build and Analyze
 
 # # on:
 # #   push:
 # #     branches:
 # #       - main
-
 
 # # jobs:
 # #   build:
@@ -68,20 +97,54 @@
 # #     runs-on: ubuntu-latest
     
 # #     steps:
-# #       - uses: actions/checkout@v4
+# #       - uses: actions/checkout@v2
 # #         with:
-# #           fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
-# #       - uses: sonarsource/sonarqube-scan-action@master
+# #           fetch-depth: 0  # Shallow clones should be disabled for better relevancy of analysis
+
+# #       - name: Set up Java
+# #         uses: actions/setup-java@v2
+# #         with:
+# #           java-version: '11'  # Ensure compatibility with SonarScanner
+
+# #       - name: Set up Node.js
+# #         uses: actions/setup-node@v3
+# #         with:
+# #           node-version: '16'  # Adjust this as needed
+
+# #       # - name: Cache node modules
+# #       #   uses: actions/cache@v3
+# #       #   with:
+# #       #     path: ~/.npm
+# #       #     key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+# #       #     restore-keys: |
+# #       #       ${{ runner.os }}-node-
+
+# #       - name: Install dependencies
+# #         run: npm install
+
+# #       - name: Run tests
+# #         run: npm test
+
+# #       - name: Install SonarQube Scanner
+# #         run: npm install -g sonarqube-scanner
+
+# #       - name: SonarQube Scan
 # #         env:
 # #           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
 # #           SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
+# #         run: |
+# #           sonar-scanner -X \
+# #             -Dsonar.projectKey=TEST_PROJECT \
+# #             -Dsonar.organization=TEST_PROJECT \
+# #             -Dsonar.host.url=${{ secrets.SONAR_HOST_URL }} \
+# #             -Dsonar.login=${{ secrets.SONAR_TOKEN }}
+
 # #       # If you wish to fail your job when the Quality Gate is red, uncomment the
 # #       # following lines. This would typically be used to fail a deployment.
 # #       # - uses: sonarsource/sonarqube-quality-gate-action@master
 # #       #   timeout-minutes: 5
 # #       #   env:
 # #       #     SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-
 
 
 # name: Build and Analyze
@@ -104,6 +167,7 @@
 #       - name: Set up Java
 #         uses: actions/setup-java@v2
 #         with:
+#           distribution: 'openjdk'  # Specify the OpenJDK distribution
 #           java-version: '11'  # Ensure compatibility with SonarScanner
 
 #       - name: Set up Node.js
@@ -111,13 +175,13 @@
 #         with:
 #           node-version: '16'  # Adjust this as needed
 
-#       # - name: Cache node modules
-#       #   uses: actions/cache@v3
-#       #   with:
-#       #     path: ~/.npm
-#       #     key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
-#       #     restore-keys: |
-#       #       ${{ runner.os }}-node-
+#       - name: Cache node modules
+#         uses: actions/cache@v3
+#         with:
+#           path: ~/.npm
+#           key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+#           restore-keys: |
+#             ${{ runner.os }}-node-
 
 #       - name: Install dependencies
 #         run: npm install
@@ -147,65 +211,61 @@
 #       #     SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
 
 
-name: Build and Analyze
+
+
+name: SonarQube Analysis
 
 on:
-  push:
+  pull_request:
     branches:
       - main
+      - develop
 
 jobs:
-  build:
-    name: Build and analyze
+  sonarqube:
     runs-on: ubuntu-latest
-    
+
     steps:
-      - uses: actions/checkout@v2
-        with:
-          fetch-depth: 0  # Shallow clones should be disabled for better relevancy of analysis
+    - name: Checkout code
+      uses: actions/checkout@v2
 
-      - name: Set up Java
-        uses: actions/setup-java@v2
-        with:
-          distribution: 'openjdk'  # Specify the OpenJDK distribution
-          java-version: '11'  # Ensure compatibility with SonarScanner
+    - name: Set up JDK 11
+      uses: actions/setup-java@v2
+      with:
+        java-version: 11
 
-      - name: Set up Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: '16'  # Adjust this as needed
+    - name: Cache SonarQube packages
+      uses: actions/cache@v2
+      with:
+        path: ~/.sonar/cache
+        key: ${{ runner.os }}-sonar-${{ hashFiles('**/*.gradle*', '**/*.java*') }}
+        restore-keys: ${{ runner.os }}-sonar
 
-      - name: Cache node modules
-        uses: actions/cache@v3
-        with:
-          path: ~/.npm
-          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
-          restore-keys: |
-            ${{ runner.os }}-node-
+    - name: Cache Gradle packages
+      uses: actions/cache@v2
+      with:
+        path: ~/.gradle/caches
+        key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/*.java*') }}
+        restore-keys: ${{ runner.os }}-gradle
 
-      - name: Install dependencies
-        run: npm install
+    - name: Grant execute permission for gradlew
+      run: chmod +x gradlew
 
-      - name: Run tests
-        run: npm test
+    - name: Build with Gradle
+      run: ./gradlew build
 
-      - name: Install SonarQube Scanner
-        run: npm install -g sonarqube-scanner
-
-      - name: SonarQube Scan
-        env:
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-          SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
-        run: |
-          sonar-scanner -X \
+    - name: SonarQube Scan
+      env:
+        SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+      run: ./gradlew sonarqube \
             -Dsonar.projectKey=TEST_PROJECT \
-            -Dsonar.organization=TEST_PROJECT \
-            -Dsonar.host.url=${{ secrets.SONAR_HOST_URL }} \
+            -Dsonar.host.url=https://localhost:9000 \
             -Dsonar.login=${{ secrets.SONAR_TOKEN }}
 
-      # If you wish to fail your job when the Quality Gate is red, uncomment the
-      # following lines. This would typically be used to fail a deployment.
-      # - uses: sonarsource/sonarqube-quality-gate-action@master
-      #   timeout-minutes: 5
-      #   env:
-      #     SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+    - name: Quality Gate
+      uses: sonarsource/sonarqube-scan-action@v1.0
+      env:
+        SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+      with:
+        projectBaseDir: '.'
+
